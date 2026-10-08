@@ -1,124 +1,208 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.integrate as integral
+from Numeric_Integral import *
 
-def Trapez_integral(n, f_x, x_start, x_end):
-    """
-        Berechen das Integral von f(x) über das Intervall [x[0], x[-1]] mit der Trapezregel.
+# region Aufgagabe 1a) 
 
-        Parameters
-        ----------
-        n : int
-            Die Anzahl der Intervalle, in die das Intervall [x[0], x[-1]] unterteilt wird.
-        f_x : lambda function
-            Die Funktion f(x), die integriert werden soll.
-        x_start : float
-            Der Startwert des Intervalls.
-        x_end : float
-            Der Endwert des Intervalls.
-    """
-    integral = 0
-    delt_x = (x_end - x_start) / n
+"""
+    Aufgabe 1a)
 
-    for ind in range(n):
-        a = f_x(x_start + ind * delt_x)
-        b = f_x(x_start + (ind + 1) * delt_x)
+        Numerische Berechnung des Integrals
 
-        integral += delt_x * (a + b) / 2
+            ∫_0^1 1 / sqrt(1 - y^4) dy
 
-    return integral
+        mit der Trapezregel, Simpsonregel und Gaußquadratur.
+        Anschließend wird die Substitution
 
-def Simpson_integral(n, f_x, x_start, x_end):
-    """
-        Berechen das Integral von f(x) über das Intervall [x[0], x[-1]] mit der Simpsonregel.
+            y = sin(u)
 
-        Parameters
-        ----------
-        n : int
-            Die Anzahl der Intervalle, in die das Intervall [x[0], x[-1]] unterteilt wird.
-        f_x : lambda function
-            Die Funktion f(x), die integriert werden soll.
-        x_start : float
-            Der Startwert des Intervalls.
-        x_end : float
-            Der Endwert des Intervalls.
-    """
-    integral = 0
-    delt_x = (x_end - x_start) / n
+        verwendet.
+"""
 
-    for ind in range(0, n - 2, 2):
-        a = f_x(x_start + ind * delt_x)
-        b = f_x(x_start + (ind + 1) * delt_x)
-        m = f_x(x_start + (ind + 0.5) * delt_x)
+# ------------------------------------------------------------
+# Parameter und Integrationsgrenzen
+# ------------------------------------------------------------
 
-        integral += delt_x * (a + 4 * m + b) / 3
+a = 4
 
-    return integral
+y_anfang = 0
+y_ende = 1
 
-def Gaus_integral(n, f_x, x_start, x_end):
-    """
-        Berechen das Integral von f(x) über das Intervall [x[0], x[-1]] mit der Gaußregel.
+u_anfang = 0
+u_ende = np.pi / 2
 
-        Parameters
-        ----------
-        n : int
-            Die Anzahl der Intervalle, in die das Intervall [x[0], x[-1]] unterteilt wird.
-        f_x : lambda function
-            Die Funktion f(x), die integriert werden soll.
-        x_start : float
-            Der Startwert des Intervalls.
-        x_end : float
-            Der Endwert des Intervalls.
-    """
-    integral = 0
-    delt_x = (x_end - x_start) / n
-
-    for ind in range(n):
-        a = f_x(x_start + (ind+ 0.5) * delt_x)
-
-
-        integral += delt_x * a
-
-    return integral
-
-def exact_integral(f_x, x_start, x_end):
-    """
-        Berechen das exakte Integral von f(x) über das Intervall [x[0], x[-1]].
-
-        Parameters
-        ----------
-        f_x : lambda function
-            Die Funktion f(x), die integriert werden soll.
-        x_start : float
-            Der Startwert des Intervalls.
-        x_end : float
-            Der Endwert des Intervalls.
-    """
-    return integral.quad(f_x, x_start, x_end)[0]
-
-
-lambda_f = lambda x: np.sin(x)  # Funktion, die integriert werden soll
-N_max = 10  # Maximale Anzahl der Intervalle
+N_max = 10
 N = np.arange(1, N_max + 1)
 
-Trapez = []
-Simpson = []
-Gaus = []
-exact = exact_integral(lambda_f, 0, np.pi)
+# ------------------------------------------------------------
+# Integranden
+# ------------------------------------------------------------
+
+# Ursprüngliches Integral:
+f_y = lambda y: 1 / np.sqrt(1 - y**a)
+
+# Nach der Substitution y = sin(u):
+f_u = lambda u: 1 / np.sqrt(1 + np.sin(u)**2)
+
+# ------------------------------------------------------------
+# Numerische Integration ohne Substitution
+# ------------------------------------------------------------
+
+trapez_ohne = []
+simpson_ohne = []
+gauss_ohne = []
+exact_ohne = exact_integral(f_y, y_anfang, y_ende)
 
 for n in N:
-    Trapez.append(Trapez_integral(n, lambda_f, 0, np.pi))
-    Simpson.append(Simpson_integral(n, lambda_f, 0, np.pi))
-    Gaus.append(Gaus_integral(n, lambda_f, 0, np.pi))
+    trapez_ohne.append(Trapez_integral(n, f_y, y_anfang, y_ende))
 
-plt.figure()
-plt.plot(N, np.array(Trapez), label='Trapezregel')
-plt.plot(N, np.array(Simpson), label='Simpsonregel')
-plt.plot(N, np.array(Gaus), label='Gaußregel')
-plt.hlines(exact, 1, N_max, colors='k', linestyles='dashed', label='Exaktes Integral')
-plt.xlabel('Anzahl der Intervalle')
-plt.ylabel('Absoluter Fehler')
-plt.title('Absoluter Fehler der Integrationsmethoden')
-plt.legend()
+    simpson_ohne.append(Simpson_integral(n, f_y, y_anfang, y_ende))
+
+    gauss_ohne.append(Gaus_integral(n, f_y, y_anfang, y_ende))
+
+# ------------------------------------------------------------
+# Numerische Integration mit Substitution
+# ------------------------------------------------------------
+
+trapez_mit = []
+simpson_mit = []
+gauss_mit = []
+exact_mit = exact_integral(f_u, u_anfang, u_ende)
+
+for n in N:
+    trapez_mit.append(Trapez_integral(n, f_u, u_anfang, u_ende))
+
+    simpson_mit.append(Simpson_integral(n, f_u, u_anfang, u_ende))
+
+    gauss_mit.append(Gaus_integral(n, f_u, u_anfang, u_ende))
+
+# ------------------------------------------------------------
+# Darstellung der Ergebnisse
+# ------------------------------------------------------------
+
+fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+# --- Ohne Substitution ---------------------------------------
+
+ax[0].plot(N, trapez_ohne, label="Trapezregel")
+ax[0].plot(N, simpson_ohne, label="Simpsonregel")
+ax[0].plot(N, gauss_ohne, label="Gaußregel")
+
+ax[0].hlines(exact_ohne, 1, N_max, colors="k", linestyles="dashed", label="Exaktes Integral")
+
+ax[0].set_xlabel("Anzahl der Intervalle")
+ax[0].set_ylabel("Integralwert")
+ax[0].set_title("Numerische Integration ohne Substitution")
+ax[0].legend(loc="lower right")
+ax[0].grid()
+
+
+# --- Mit Substitution ----------------------------------------
+
+ax[1].plot(N, trapez_mit, label="Trapezregel")
+ax[1].plot(N, simpson_mit, label="Simpsonregel")
+ax[1].plot(N, gauss_mit, label="Gaußregel")
+
+ax[1].hlines(exact_mit, 1, N_max, colors="k", linestyles="dashed", label="Exaktes Integral")
+
+ax[1].set_xlabel("Anzahl der Intervalle")
+ax[1].set_ylabel("Integralwert")
+ax[1].set_title("Numerische Integration mit Substitution")
+ax[1].legend(loc="lower right")
+ax[1].grid()
+
+plt.tight_layout()
+plt.show()
+
+# endregion
+
+# region Aufgabe 1b)
+
+m = 1
+n = 10
+
+A = np.linspace(0.001, np.pi - 0.001, 100)
+
+V_x = [
+    lambda x: np.cosh(x),
+    lambda x: np.exp(np.abs(x)),
+    lambda x: -np.cos(x)
+]
+
+# Substitution: x = a * (1 - u^2)
+
+x = lambda u, a: a * (1 - u**2)
+dx = lambda u, a: 2 * a * u
+
+u_anfang = 0
+u_ende = 1
+
+T_a_trapez_ges = []
+T_a_simpson_ges = []
+T_a_gauss_ges = []
+T_a_soll_ges = []
+
+for i, V in enumerate(V_x):
+
+    T_a_trapez = []
+    T_a_simpson = []
+    T_a_gauss = []
+    T_a_soll = []
+
+    for a in A:
+
+        if i == 0:
+            grenzwert = 2 * np.sqrt(a / np.sinh(a))
+
+        elif i == 1:
+            grenzwert = 2 * np.sqrt(a / np.exp(a))
+
+        else:
+            grenzwert = 2 * np.sqrt(a / np.sin(a))
+
+        def integrand(u):
+            if u == 0:
+                return grenzwert
+
+            return dx(u, a) / np.sqrt(V(a) - V(x(u, a)))
+        
+        T_a_trapez.append(Trapez_integral(n, integrand, u_anfang, u_ende))
+        T_a_simpson.append(Simpson_integral(n, integrand, u_anfang, u_ende))
+        T_a_gauss.append(Gaus_integral(n, integrand, u_anfang, u_ende))
+        T_a_soll.append(exact_integral(integrand, u_anfang, u_ende))
+
+    T_a_trapez_ges.append(np.array(T_a_trapez))
+    T_a_simpson_ges.append(np.array(T_a_simpson))
+    T_a_gauss_ges.append(np.array(T_a_gauss))
+    T_a_soll_ges.append(np.array(T_a_soll))
+
+
+faktor = np.sqrt(8 * m)
+
+titel = [
+    r"$V(x) = \cosh(x)$",
+    r"$V(x) = e^{|x|}$",
+    r"$V(x) = -\cos(x)$"
+]
+
+fig, ax = plt.subplots(1, 3)
+ax = ax.flatten()
+for i in range(len(V_x)):
+
+    ax[i].plot(A, T_a_trapez_ges[i] * faktor, label="Trapezregel")
+    ax[i].plot(A, T_a_simpson_ges[i] * faktor, label="Simpsonregel")
+    ax[i].plot(A, T_a_gauss_ges[i] * faktor, label="Gaußregel")
+    ax[i].plot(A, T_a_soll_ges[i] * faktor, label="Exaktes Integral")
+    ax[i].set_xlabel("a")
+    ax[i].set_ylabel("T(a)")
+    ax[i].set_title(titel[i])
+
+    ax[i].legend()
+    ax[i].grid()
+
 
 plt.show()
+
+# endregion
+
+
