@@ -32,7 +32,7 @@ u_anfang = 0
 u_ende = np.pi / 2
 
 N_max = 10
-N = np.arange(1, N_max + 1)
+N = np.arange(2, N_max + 1,2)
 
 # ------------------------------------------------------------
 # Integranden
@@ -58,7 +58,7 @@ for n in N:
 
     simpson_ohne.append(Simpson_integral(n, f_y, y_anfang, y_ende))
 
-    gauss_ohne.append(Gaus_integral(n, f_y, y_anfang, y_ende))
+    gauss_ohne.append(Gaus_quadratur_integral(f_y, y_anfang, y_ende, n))
 
 # ------------------------------------------------------------
 # Numerische Integration mit Substitution
@@ -74,7 +74,7 @@ for n in N:
 
     simpson_mit.append(Simpson_integral(n, f_u, u_anfang, u_ende))
 
-    gauss_mit.append(Gaus_integral(n, f_u, u_anfang, u_ende))
+    gauss_mit.append(Gaus_quadratur_integral(f_u, u_anfang, u_ende, n))
 
 # ------------------------------------------------------------
 # Darstellung der Ergebnisse
@@ -168,7 +168,7 @@ for i, V in enumerate(V_x):
         
         T_a_trapez.append(Trapez_integral(n, integrand, u_anfang, u_ende))
         T_a_simpson.append(Simpson_integral(n, integrand, u_anfang, u_ende))
-        T_a_gauss.append(Gaus_integral(n, integrand, u_anfang, u_ende))
+        T_a_gauss.append(Gaus_quadratur_integral(lambda u: dx(u, a) / np.sqrt(V(a) - V(x(u, a))), u_anfang, u_ende, n))
         T_a_soll.append(exact_integral(integrand, u_anfang, u_ende))
 
     T_a_trapez_ges.append(np.array(T_a_trapez))
@@ -185,8 +185,9 @@ titel = [
     r"$V(x) = -\cos(x)$"
 ]
 
-fig, ax = plt.subplots(1, 3)
+fig, ax = plt.subplots(2, 2)
 ax = ax.flatten()
+
 for i in range(len(V_x)):
 
     ax[i].plot(A, T_a_trapez_ges[i] * faktor, label="Trapezregel")
@@ -201,8 +202,24 @@ for i in range(len(V_x)):
     ax[i].grid()
 
 
-plt.show()
 
+fig, ax = plt.subplots(2, 2)
+ax = ax.flatten()
+
+for i in range(len(V_x)):
+
+    ax[i].plot(A,np.abs(T_a_trapez_ges[i] * faktor - T_a_soll_ges[i] * faktor), label="Trapezregel")
+    ax[i].plot(A, np.abs(T_a_simpson_ges[i] * faktor - T_a_soll_ges[i] * faktor), label="Simpsonregel")
+    ax[i].plot(A, np.abs(T_a_gauss_ges[i] * faktor - T_a_soll_ges[i] * faktor), label="Gaußregel")
+    ax[i].set_xlabel("a")
+    ax[i].set_ylabel("T(a)")
+    ax[i].set_title(titel[i])
+    ax[i].set_yscale("log")
+    ax[i].legend()
+    ax[i].grid()
+
+
+plt.show()
 # endregion
 
 
