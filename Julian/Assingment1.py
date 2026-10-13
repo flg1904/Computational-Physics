@@ -82,8 +82,7 @@ for n in N:
 # Darstellung der Ergebnisse
 # ------------------------------------------------------------
 
-fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-
+fig, ax = plt.subplots(1, 2, figsize=(12, 5), num = "Numerische Integration 1a)")
 # --- Ohne Substitution ---------------------------------------
 
 ax[0].plot(N, trapez_ohne, label="Trapezregel")
@@ -205,9 +204,8 @@ titel = [
 
 
 
-fig, ax = plt.subplots(2, 2)
+fig, ax = plt.subplots(2, 2, num = "Abweichung der numerischen Integrale vom exakten Integral 1b)")
 ax = ax.flatten()
-
 for i in range(len(V_x)):
 
     ax[i].plot(A,np.abs(T_a_trapez_ges[i] * faktor - T_a_soll_ges[i] * faktor), label="Trapezregel")
@@ -221,10 +219,10 @@ for i in range(len(V_x)):
     ax[i].grid()
 
 
-plt.show()
+# plt.show()
 # endregion
 
-# region Aufgabe 1c)
+# region Aufgabe 2a)
 
 # --------------------------------------------------
 # 3. Parameter des Erde-Sonne-Systems
@@ -299,7 +297,7 @@ fehler_newton = np.abs(Schritte_newton - x_ref)
 # 8. Diagramm: Konvergenzvergleich
 # --------------------------------------------------
 
-plt.figure()
+plt.figure(num="Konvergenzvergleich 2a)")
 
 plt.semilogy(
     range(len(fehler_bis)),
@@ -321,6 +319,9 @@ plt.ylabel("Fehler |x_n - x_ref|")
 plt.title("Konvergenzvergleich")
 plt.legend()
 plt.grid(True)
+# endregion
+
+# region Aufgabe 2b)
 
 # --------------------------------------------------
 # 9. Quadratische Konvergenz des Newton-Verfahrens
@@ -336,7 +337,7 @@ maske = ((fehler[:-1] > 0) & (fehler[1:] > 0))
 e_n = fehler[:-1][maske]
 e_n1 = fehler[1:][maske]
 
-plt.figure()
+plt.figure(num="Quadratische Konvergenz des Newton-Verfahrens 2b)")
 
 plt.loglog(e_n, e_n1, "o", label="Newton-Verfahren")
 
@@ -351,5 +352,64 @@ plt.title("Überprüfung der quadratischen Konvergenz")
 plt.legend()
 plt.grid(True)
 
-plt.show()
+# plt.show()
 #endregion
+
+# region Aufgabe 3a)
+
+nullstellen_pression = 1e-4
+versuche = 20
+
+anz_nullstellen = []
+
+pr = False
+
+for _ in range(versuche):
+    a = np.random.uniform(0, 1, 7)
+
+    f = np.poly1d(a)
+    df = np.polyder(f)
+
+    x_werte = np.linspace(-10, 10, 10001)
+
+    nullstellen = []
+
+    for i in range(len(x_werte) - 1):
+        a = x_werte[i]
+        b = x_werte[i + 1]
+
+        if f(a) * f(b) < 0:
+            nullstelle, schritte = Bisektionsverfahren(f, a, b)
+            nullstellen.append(nullstelle)
+
+    if len(nullstellen) == 0:
+        anz_nullstellen.append(0)
+        continue
+    else:
+        nullstellen.sort()
+        eindeutige_nullstellen = [nullstellen[0]]
+
+        for x in nullstellen[1:]:
+            if abs(x - eindeutige_nullstellen[-1]) > nullstellen_pression:
+                eindeutige_nullstellen.append(x)
+
+        if pr == False:
+            plt.figure(num = "Verteilung der reellen Nullstellen 3a)")
+            plt.plot(x_werte, f(x_werte), label="Polynom")
+            plt.plot(eindeutige_nullstellen, f(eindeutige_nullstellen), "ro", label="Nullstellen")
+            plt.hlines(0, -10, 10, "k", label="x-Achse")
+            # plt.vlines(durchschnitt, ymin=0, ymax=5, colors="r", linestyles="dashed", label="Durchschnitt")
+            plt.xlabel("Nullstelle x")
+            plt.ylabel("Häufigkeit")
+            plt.title("Verteilung der reellen Nullstellen")
+            pr = True
+        anz_nullstellen.append(len(eindeutige_nullstellen))
+
+
+print(f"Durchschnittliche Anzahl der reellen Nullstellen: {np.mean(anz_nullstellen):.2f}")
+
+plt.show()
+
+
+
+# endregion
