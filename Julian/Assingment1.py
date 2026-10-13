@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from Numeric_Integral import *
+from Findig_zeros import *
+
 
 # region Aufgagabe 1a) 
 
@@ -112,7 +114,7 @@ ax[1].legend(loc="lower right")
 ax[1].grid()
 
 plt.tight_layout()
-plt.show()
+# plt.show()
 
 # endregion
 
@@ -185,21 +187,21 @@ titel = [
     r"$V(x) = -\cos(x)$"
 ]
 
-fig, ax = plt.subplots(2, 2)
-ax = ax.flatten()
+# fig, ax = plt.subplots(2, 2)
+# ax = ax.flatten()
 
-for i in range(len(V_x)):
+# for i in range(len(V_x)):
 
-    ax[i].plot(A, T_a_trapez_ges[i] * faktor, label="Trapezregel")
-    ax[i].plot(A, T_a_simpson_ges[i] * faktor, label="Simpsonregel")
-    ax[i].plot(A, T_a_gauss_ges[i] * faktor, label="Gaußregel")
-    ax[i].plot(A, T_a_soll_ges[i] * faktor, label="Exaktes Integral")
-    ax[i].set_xlabel("a")
-    ax[i].set_ylabel("T(a)")
-    ax[i].set_title(titel[i])
+#     ax[i].plot(A, T_a_trapez_ges[i] * faktor, label="Trapezregel")
+#     ax[i].plot(A, T_a_simpson_ges[i] * faktor, label="Simpsonregel")
+#     ax[i].plot(A, T_a_gauss_ges[i] * faktor, label="Gaußregel")
+#     ax[i].plot(A, T_a_soll_ges[i] * faktor, label="Exaktes Integral")
+#     ax[i].set_xlabel("a")
+#     ax[i].set_ylabel("T(a)")
+#     ax[i].set_title(titel[i])
 
-    ax[i].legend()
-    ax[i].grid()
+#     ax[i].legend()
+#     ax[i].grid()
 
 
 
@@ -222,4 +224,132 @@ for i in range(len(V_x)):
 plt.show()
 # endregion
 
+# region Aufgabe 1c)
 
+# --------------------------------------------------
+# 3. Parameter des Erde-Sonne-Systems
+# --------------------------------------------------
+
+M_sonne = 1.989e30
+M_erde = 5.972e24
+R = 1.496e11
+
+mu = M_erde / (M_sonne + M_erde)
+
+# --------------------------------------------------
+# 4. Lagrange-Gleichung
+# --------------------------------------------------
+
+def f(x):
+    return (x**5 + (mu - 3)*x**4 + (3 - 2*mu)*x**3 - mu*x**2 + 2*mu*x - mu)
+
+
+def df(x):
+    return (5*x**4 + 4*(mu - 3)*x**3 + 3*(3 - 2*mu)*x**2 - 2*mu*x + 2*mu)
+
+# --------------------------------------------------
+# 5. Nullstelle mit beiden Methoden berechnen
+# --------------------------------------------------
+
+# Für die definierte Variable x liegt L1 zwischen
+# der Erde (x=0) und der Sonne (x=1).
+# Die gesuchte Lösung liegt nahe bei x=1.
+
+x_bis, Schritte_bis = Bisektionsverfahren(f, 0, 1)
+x_newton, Schritte_newton = Newtonverfahren(f, df, 1)
+
+print("Bisektionsverfahren:")
+print("x =", x_bis)
+
+print("\nNewton-Verfahren:")
+print("x =", x_newton)
+
+# --------------------------------------------------
+# 6. Abstand von L1 zur Erde
+# --------------------------------------------------
+
+# Laut Aufgabenstellung gilt x = r/R,
+# wobei r der Abstand von L1 zur Erde ist.
+# Die Gleichung (9) verwendet jedoch x=r/R in
+# Verbindung mit der ursprünglichen Gleichung.
+#
+# Für die vorliegende dimensionslose Gleichung
+# liegt L1 bei x nahe 1.
+
+r = x_newton * R
+
+print("\nAbstand r = x * R:")
+print(f"r = {r:.6e} m")
+print(f"r = {r / 1000:.6e} km")
+
+# --------------------------------------------------
+# 7. Fehler für den Konvergenzvergleich
+# --------------------------------------------------
+
+# Eine hochgenaue Referenzlösung wird mit Newton
+# und strenger Toleranz berechnet.
+
+x_ref, _ = Newtonverfahren(f, df, 0.99, tol=1e-14)
+
+fehler_bis = np.abs(Schritte_bis - x_ref)
+
+fehler_newton = np.abs(Schritte_newton - x_ref)
+
+# --------------------------------------------------
+# 8. Diagramm: Konvergenzvergleich
+# --------------------------------------------------
+
+plt.figure()
+
+plt.semilogy(
+    range(len(fehler_bis)),
+    fehler_bis,
+    "o-",
+    label="Bisektionsverfahren"
+)
+
+plt.semilogy(
+    range(len(fehler_newton)),
+    fehler_newton,
+    "o-",
+    label="Newton-Verfahren"
+)
+
+plt.xticks(range(len(fehler_bis)))
+plt.xlabel("Iteration n")
+plt.ylabel("Fehler |x_n - x_ref|")
+plt.title("Konvergenzvergleich")
+plt.legend()
+plt.grid(True)
+
+# --------------------------------------------------
+# 9. Quadratische Konvergenz des Newton-Verfahrens
+# --------------------------------------------------
+
+fehler = fehler_newton
+
+# Fehler dürfen für die logarithmische Darstellung
+# nicht null sein.
+
+maske = ((fehler[:-1] > 0) & (fehler[1:] > 0))
+
+e_n = fehler[:-1][maske]
+e_n1 = fehler[1:][maske]
+
+plt.figure()
+
+plt.loglog(e_n, e_n1, "o", label="Newton-Verfahren")
+
+# Referenzkurve proportional zu e_n^2
+if len(e_n) > 0:
+    referenz = e_n**2
+    plt.loglog(e_n, referenz, "--", label="Referenz: e_(n+1) ~ e_n^2")
+
+plt.xlabel("Fehler e_n")
+plt.ylabel("Fehler e_(n+1)")
+plt.title("Überprüfung der quadratischen Konvergenz")
+plt.legend()
+plt.grid(True)
+
+plt.show()
+#endregion
