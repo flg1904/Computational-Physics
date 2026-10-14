@@ -358,7 +358,7 @@ plt.grid(True)
 # region Aufgabe 3a)
 
 nullstellen_pression = 1e-4
-versuche = 20
+versuche = 10
 
 anz_nullstellen = []
 
