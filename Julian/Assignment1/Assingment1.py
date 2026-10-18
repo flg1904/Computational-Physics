@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Julian.Assignment1.Numeric_Integral import *
-from Julian.Assignment1.Findig_zeros import *
+from Numeric_Integral import *
+from Findig_zeros import *
 
 
 # region Aufgagabe 1a) 
@@ -301,7 +301,7 @@ ratio_values = []
 a1_best = []
 ratio_best = []
 
-plt.figure(num="Optimierung der Formparameter 1c)")
+plt.figure(num="Optimierung der Formparameter 1c)", figsize=(8,5))
 print("\n 1c)")
 # Schleife über die Potentiale: Verhältnis für alle a1 berechnen, bestes a1 wählen und plotten
 for i in range(len(V_x)):
@@ -315,6 +315,9 @@ for i in range(len(V_x)):
     print(f"Best a1 für V(x) = {V_x_txt[i]}: {a1_best[i]:.4f} mit Verhältnis: {ratio_best[i]:.4f}")
     plt.plot(x, normalize(V_x[i], a1_best[i], a)(x), label=V_x_txt[i])
 
+plt.xlabel("x")
+plt.ylabel("V(x)")
+plt.grid()
 print("\n")
 plt.legend()
 plt.savefig("1c).png")
