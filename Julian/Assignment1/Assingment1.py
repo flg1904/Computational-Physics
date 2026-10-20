@@ -481,56 +481,35 @@ num_roots = []
 # Steuert, dass nur das erste Polynom geplottet wird
 plotted = False
 
+
 for _ in range(trials):
     # Zufällige Koeffizienten und Polynom samt Ableitung
     a = np.random.uniform(0, 1, 7)
-
-    f = np.poly1d(a)
-    df = np.polyder(f)
-
-    x_values = np.linspace(-10, 10, 10001)
-
-    roots = []
+    f = np.poly1d(a) 
 
     # Vorzeichenwechsel suchen und dort die Nullstelle per Bisektion bestimmen
-    for i in range(len(x_values) - 1):
-        a = x_values[i]
-        b = x_values[i + 1]
+    
+    unique_roots = Zeros_in_Area(f,-10,10, root_precision)
 
-        if f(a) * f(b) < 0:
-            root, steps = Bisektionsverfahren(f, a, b)
-            roots.append(root)
+    if plotted == False and len(unique_roots) != 0:
+        plt.figure(num = "Verteilung der reellen Nullstellen 3a)")
+        x_left, x_right = unique_roots[0] - 0.5, unique_roots[-1] + 0.5
+        x_plot = np.abs(x_left - x_right)
+        x_values = np.linspace(x_left, x_right ,np.int32(np.round(x_plot / root_precision)))
+        plt.plot(x_values, f(x_values), label="Polynom")
+        plt.plot(unique_roots, f(unique_roots), "ro", label="Nullstellen")
+        plt.hlines(0, x_left, x_right, "k", label="x-Achse")
+        plt.xlabel("Nullstelle x")
+        plt.ylabel("Häufigkeit")
+        plt.title("Verteilung der reellen Nullstellen")
+        plotted = True
 
-    if len(roots) == 0:
-        num_roots.append(0)
-        continue
-    else:
-        # Doppelte Nullstellen (Abstand <= root_precision) entfernen
-        roots.sort()
-        unique_roots = [roots[0]]
-
-        for x in roots[1:]:
-            if abs(x - unique_roots[-1]) > root_precision:
-                unique_roots.append(x)
-
-        if plotted == False:
-            plt.figure(num = "Verteilung der reellen Nullstellen 3a)")
-            plt.plot(x_values, f(x_values), label="Polynom")
-            plt.plot(unique_roots, f(unique_roots), "ro", label="Nullstellen")
-            plt.hlines(0, -10, 10, "k", label="x-Achse")
-            # plt.vlines(average, ymin=0, ymax=5, colors="r", linestyles="dashed", label="Durchschnitt")
-            plt.xlabel("Nullstelle x")
-            plt.ylabel("Häufigkeit")
-            plt.title("Verteilung der reellen Nullstellen")
-            plotted = True
-        num_roots.append(len(unique_roots))
+    num_roots.append(len(unique_roots))
 
 
 print(f"Durchschnittliche Anzahl der reellen Nullstellen: {np.mean(num_roots):.2f}")
 plt.savefig("3a).png")
 
 plt.show()
-
-
 
 # endregion
