@@ -66,21 +66,12 @@ def Newtonverfahren(f, df, x0, tol=1e-6, max_iter=100):
         
     raise ValueError("Maximale Anzahl an Iterationen erreicht. Keine Nullstelle gefunden.")
 
-def Zeros_in_Area(f, a, b, epsilon = 1e-4):
-    """
-    Finding roots in Area a to b with Bisektion Methode
-    """
-    n = np.int32(np.round(np.abs(a-b) / epsilon, 0))
-    dx = np.abs((a-b)/n)
-    roots = []
-
-    for i in range(n):
-        A = a + i * dx 
-        B = a + (i + 1) * dx
-
-        if f(A) * f(B) < 0: 
-            root, N = Bisektionsverfahren(f, A, B)        
-            roots.append(root)
-
-    return np.array(roots)
+def Zeros_in_Area(f, a, b, epsilon=1e-4):
+    """Nullstellen von f in [a, b]: Vorzeichenwechsel auf Gitter suchen, dann Bisektion."""
+    
+    n = int(round(abs(b - a) / epsilon))            # Berechnen der Schritte
+    xs = np.linspace(a, b, n + 1)                   # x-Werte für auswertung
+    fs = f(xs)                                      # ein einziger Aufruf
+    idx = np.nonzero(fs[:-1] * fs[1:] < 0)[0]       # Intervalle mit Vorzeichenwechsel
+    return np.array([Bisektionsverfahren(f, xs[i], xs[i + 1])[0] for i in idx])
 
