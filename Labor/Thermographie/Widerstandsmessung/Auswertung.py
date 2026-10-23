@@ -35,10 +35,10 @@ print(f"5 x tau: {tau*5:.2f} 1/s / W, T_max: {T_max:.2f} °C")
 
 Mehrere_Datenreihen_verschiedene_Plots([[x_pix,T_x],v_plot],
                                        [[t_s,T_t],[t_s,f_T_t(t_s,tau.n, T_max.n)]],
-                                       xlabel_list=["x in Pixel","t / s"],
-                                       ylabel_list=["T / °C",r"$T_{mean}$ / °C"],
-                                       labels_list=[["T über Ort", r"$T_{mean}$ bei letztem Bild"],
-                                                    [r"$T_{mean}$ Messung","T Fit"]],
+                                       xlabel_list=["x / Pixel","t / s"],
+                                       ylabel_list=[r"$T$ / °C",r"$T_{mean}$ / °C"],
+                                       labels_list=[[r"$T(Pixel)$", r"$T_{mean}$"],
+                                                    [r"$T_{mean}(t)$","T Fit"]],
                                        fmtp_list=[colors,colors], sharey= True,
                                        grid_list= True)
 
@@ -67,7 +67,7 @@ plt.figure(figsize=(9,7))
 Mehrere_Datenreihen_ein_Plot([[P_W, T_err],T_fit], 
                              xlabel="P / W", 
                              ylabel= r"T / °C",
-                             labels=[r"$T_{mean}$ Messung", "T Fit"],
+                             labels=[r"$T_{mean}$ Messpunkte", r"$T_{mean}$ Fit"],
                              fmtp=["x","-"],
                              grid= True, 
                              error= [True, False],)
