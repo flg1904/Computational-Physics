@@ -93,7 +93,8 @@ def Plot_Datenreihe(data, titel = "Titel", xlabel = "x-Achse",
                     ylabel = "y-Achse", fmtp='-k', 
                     error=False, grid=False, label=None, 
                     interpolation="linear", leg_loc="best",
-                    label_sizes = (24,24,30), linewidth=2):
+                    label_sizes = (24,24,30), linewidth=2,
+                    markersize = 10, markerwidth = 2):
 
     """
     Plotte eine Datenreihe.
@@ -168,9 +169,14 @@ def Plot_Datenreihe(data, titel = "Titel", xlabel = "x-Achse",
                 except Exception:
                     x_err = [0] * len(x)
 
-            plt.errorbar(x, y, yerr=y_err, xerr=x_err, fmt=fmtp, label=label, capsize=5,ecolor="red",markersize=10,linewidth=linewidth)
+            plt.errorbar(x, y, yerr=y_err, xerr=x_err, fmt=fmtp, 
+                         label=label, capsize=5,ecolor="red",
+                         markersize=markersize,linewidth=linewidth,
+                         markeredgewidth=markerwidth,
+                         elinewidth=1,
+                         capthick = 1)
         else:
-            plt.plot(x, y, fmtp, label=label, markersize=10, linewidth=linewidth)
+            plt.plot(x, y, fmtp, label=label, markersize=markersize, linewidth=linewidth,markeredgewidth=markerwidth)
     else:
         f = sci.interp1d(x, y, kind=interpolation)
         x_int = np.linspace(x[0], x[-1], 1000, True)
@@ -184,7 +190,8 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                              ylabel="y-Achse", fmtp='-k', error = False,
                              grid=False, labels=None, 
                              interpolation_list="linear", leg_loc="best",
-                             label_sizes=(24,24,30),linewidths=2):
+                             label_sizes=(24,24,30),linewidths=2, markersizes = 10, 
+                             markerwiths = 2):
     """
     Plotte mehrere Datenreihen.
     param data_list: Liste von Arrays mit den Daten
@@ -217,7 +224,10 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
         error = [error] * len(data_list)
     if not isinstance(linewidths, list):
         linewidths = [linewidths] * len(data_list)
-
+    if not isinstance(markersizes, list):
+        markersizes = [markersizes] * len(data_list)
+    if not isinstance(markerwiths, list):
+        markerwiths = [markerwiths] * len(data_list)
 
     for i, data in enumerate(data_list):
         label = labels[i] if labels else None
@@ -227,7 +237,9 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                         interpolation=interpolation_list[i],
                         leg_loc=leg_loc,
                         label_sizes=label_sizes,
-                        linewidth=linewidths[i])
+                        linewidth=linewidths[i],
+                        markersize=markerwiths[i],
+                        markerwidth=markerwiths[i])
   
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
@@ -239,7 +251,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     ylabel_list=None, fmtp_list=None, error_list=None,
     grid_list=None, labels_list=None,
     interpolation_listen=None, leg_loc_list = "best",
-    label_sizes_list=(24,24,30), linewidths_list=2, sharey = False):
+    label_sizes_list=(24,24,30), linewidths_list=2, 
+    sharey = False, markersize_list = 10 , markerwith_list = 2):
     """
     Plotte mehrere Datenreihen in verschiedenen Subplots (max. 4).
     Jeder Datenblock (data_list_pn) enthält mehrere Kurven für einen Subplot.
@@ -284,6 +297,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     leg_loc_list = expand(leg_loc_list, "upper right", anz_plots)
     label_sizes_list = expand(label_sizes_list, (18, 18, 24), anz_plots)
     linewidths_list = expand(linewidths_list, 2, anz_plots)
+    markersize_list = expand(markersize_list, 2, anz_plots)
+    markerwith_list = expand(markerwith_list, 2, anz_plots)
     # Figure vorbereiten
     figsize = (12, 8) if anz_plots == 1 else (16, 7)
 
@@ -327,7 +342,9 @@ def Mehrere_Datenreihen_verschiedene_Plots(
             interpolation_list=interpolation_listen[plot_index],
             leg_loc=leg_loc_list[plot_index],
             label_sizes=label_sizes_list[plot_index],
-            linewidths=linewidths_list[plot_index]
+            linewidths=linewidths_list[plot_index],
+            markersizes=markersize_list[plot_index],
+            markerwiths= markerwith_list[plot_index]
         )
 
         plot_index += 1

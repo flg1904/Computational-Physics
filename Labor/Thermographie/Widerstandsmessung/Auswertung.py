@@ -63,14 +63,15 @@ P_W = U_err * I_err * 1e-3
 
 k, d, T_fit = lineare_Regression([P_W, T_err])
 print(f"Steigung: {k:.2f} °C / W, Abstand: {d:.2f} °C")
-plt.figure(figsize=(9,7))
+plt.figure(figsize=(16, 7))
 Mehrere_Datenreihen_ein_Plot([[P_W, T_err],T_fit], 
                              xlabel="P / W", 
                              ylabel= r"T / °C",
-                             labels=[r"$T_{mean}$ Messpunkte", r"$T_{mean}$ Fit"],
-                             fmtp=["x","-"],
+                             labels=[r"Messpunkte", r"linearer Fit"],
+                             fmtp=["o","-"],
                              grid= True, 
-                             error= [True, False],)
+                             error= [True, False],
+                             markerwiths= None)
 
 plt.show()
 
