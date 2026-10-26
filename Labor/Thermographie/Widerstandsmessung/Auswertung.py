@@ -3,6 +3,13 @@ import matplotlib.pyplot as plt
 import pandas as pan
 import scipy.optimize as sc
 from uncertainties import ufloat
+import sys
+from pathlib import Path
+
+# Repo-Wurzel relativ zu dieser Datei bestimmen (parents[2] = zwei Ebenen höher)
+repo_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(repo_root / "Bibliotheken"))
+
 from Fehlerberechnung import *
 
 Text_size = 15
