@@ -36,6 +36,7 @@ T_raum = T_t[0]
 f_T_t = lambda t, tau, T_mean: T_raum + (T_mean-T_raum) * (1 - np.exp(- t / tau))
 
 tau, T_max = fit_funktion(f_T_t,[t_s,T_t],[113, 35])
+print(f"tau: {tau:.2f} 1/s / W, T_max: {T_max:.2f} °C")
 print(f"5 x tau: {tau*5:.2f} 1/s / W, T_max: {T_max:.2f} °C")
 
 
