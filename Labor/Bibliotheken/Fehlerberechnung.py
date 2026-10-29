@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from uncertainties.core import UFloat, Variable
 import scipy.interpolate as sci
 import scipy.optimize as opt
+import math
 
 def csv_data_plus_error(data, error):
     """
@@ -249,14 +250,53 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                         leg_loc=leg_loc,
                         label_sizes=label_sizes,
                         linewidth=linewidths[i],
-                        markersize=markerwiths[i],
+                        markersize=markersizes[i],
                         markerwidth=markerwiths[i],
                         color= colors[i])
-  
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.grid(grid)
-     
+
+def _erzeuge_subplot_layout(anz_plots, sharey=False, figsize=None):
+    """
+    Erzeugt die Figure und die Achsen für anz_plots Subplots.
+    Es werden maximal 2 Plots pro Zeile gesetzt. Hat die letzte Zeile nur
+    einen Plot (z. B. bei 3 Plots), wird dieser mittig platziert.
+
+        1 Plot :  [   1   ]
+        2 Plots:  [1] [2]
+        3 Plots:  [1] [2]
+                    [3]
+        4 Plots:  [1] [2]
+                  [3] [4]
+
+    :return: fig, Liste der Achsen (in Plot-Reihenfolge)
+    """
+    ncols = 1 if anz_plots == 1 else 2
+    nrows = math.ceil(anz_plots / ncols)
+
+    if figsize is None:
+        figsize = {1: (8, 6), 2: (8, 12)}.get(anz_plots, (16, 12))
+
+    fig = plt.figure(figsize=figsize)
+    # Doppelte Spaltenzahl, damit ein einzelner Plot mittig stehen kann
+    gs = fig.add_gridspec(nrows, 2 * ncols)
+
+    axes = []
+    for i in range(anz_plots):
+        row, col = divmod(i, ncols)
+        alleine_in_letzter_zeile = (ncols == 2 and row == nrows - 1
+                                    and anz_plots % 2 == 1)
+        if alleine_in_letzter_zeile:
+            spec = gs[row, 1:3]               # mittig
+        else:
+            spec = gs[row, 2 * col: 2 * col + 2]
+
+        ax = fig.add_subplot(spec, sharey=axes[0] if (sharey and axes) else None)
+        # Bei gemeinsamer y-Achse: Tick-Beschriftung nur links anzeigen
+        if sharey and col > 0 and not alleine_in_letzter_zeile:
+            ax.tick_params(labelleft=False)
+        axes.append(ax)
+
+    return fig, axes
+
 def Mehrere_Datenreihen_verschiedene_Plots(
     data_list_p1, data_list_p2=None, data_list_p3=None,
     data_list_p4=None, titel_list=None, xlabel_list=None,
@@ -264,8 +304,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     grid_list=None, labels_list=None,
     interpolation_listen=None, leg_loc_list = "best",
     label_sizes_list=(24,24,30), linewidths_list=2, 
-    sharey = False, markersize_list = 10 , markerwith_list = 2,
-    colors_list = None):
+    sharey = False, markersize_list = 5 , markerwith_list = 1,
+    colors_list = None, figsize = None):
     """
     Plotte mehrere Datenreihen in verschiedenen Subplots (max. 4).
     Jeder Datenblock (data_list_pn) enthält mehrere Kurven für einen Subplot.
@@ -313,27 +353,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     linewidths_list = expand(linewidths_list, 2, anz_plots)
     markersize_list = expand(markersize_list, 2, anz_plots)
     markerwith_list = expand(markerwith_list, 2, anz_plots)
-    # Figure vorbereiten
-    figsize = (12, 8) if anz_plots == 1 else (16, 7)
-
-    # Anzahl der Zeilen und Spalten bestimmen
-    if anz_plots == 1:
-        nrows, ncols = 1, 1
-    elif anz_plots == 2:
-        nrows, ncols = 1, 2
-    else:
-        nrows, ncols = 2, 2
-
-    # Subplots erstellen und optional die y-Achsen teilen
-    fig, axes = plt.subplots(
-        nrows=nrows,
-        ncols=ncols,
-        figsize=figsize,
-        sharey=sharey
-    )
-
-    # Sicherstellen, dass axes immer als Array verwendet werden kann
-    axes = np.atleast_1d(axes).ravel()
+    # Figure und Achsen anlegen (3 Plots: 2 oben, 1 mittig darunter)
+    fig, axes = _erzeuge_subplot_layout(anz_plots, sharey=sharey, figsize=figsize)
 
     plot_index = 0
     for i, data in enumerate(Plots_data):
