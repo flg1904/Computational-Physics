@@ -90,13 +90,13 @@ def mean_ufloat_explicit(values):
 
     return ufloat(mean_val, mean_err)
 
-def Plot_Datenreihe(data, titel = "Titel", xlabel = "x-Achse", 
-                    ylabel = "y-Achse", fmtp='-k', 
+def Plot_Datenreihe(data, titel = None, xlabel = "x-Achse", 
+                    ylabel = "y-Achse", fmtp='-', 
                     error=False, grid=False, label=None, 
                     interpolation="linear", leg_loc="best",
                     label_sizes = (24,24,30), linewidth=2,
                     markersize = 10, markerwidth = 2,
-                    color = None):
+                    color_line = None):
 
     """
     Plotte eine Datenreihe.
@@ -177,26 +177,26 @@ def Plot_Datenreihe(data, titel = "Titel", xlabel = "x-Achse",
                          markeredgewidth=markerwidth,
                          elinewidth=1,
                          capthick = 1,
-                         color = color)
+                         color = color_line)
         else:
             plt.plot(x, y, fmtp, 
                      label=label, 
                      markersize=markersize, 
                      linewidth=linewidth,
                      markeredgewidth=markerwidth,
-                     color = color)
+                     color = color_line)
     else:
         f = sci.interp1d(x, y, kind=interpolation)
         x_int = np.linspace(x[0], x[-1], 1000, True)
         y_int = f(x_int)
         plt.plot(x_int, y_int, fmtp, label=label, linewidth=linewidth,
-                 color = color)
+                 color = color_line)
         
     if label is not None:
         plt.legend(loc = leg_loc,fontsize=18)
 
 def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse", 
-                             ylabel="y-Achse", fmtp='-k', error = False,
+                             ylabel="y-Achse", fmtp='-', error = False,
                              grid=False, labels=None, 
                              interpolation_list="linear", leg_loc="best",
                              label_sizes=(24,24,30),linewidths=2, markersizes = 10, 
@@ -252,7 +252,7 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                         linewidth=linewidths[i],
                         markersize=markersizes[i],
                         markerwidth=markerwiths[i],
-                        color= colors[i])
+                        color_line= colors[i])
 
 def _erzeuge_subplot_layout(anz_plots, sharey=False, figsize=None):
     """
@@ -445,6 +445,9 @@ def fit_funktion(func, data, p0=None):
         x = data[:, 0]
         y = data[:, 1]
 
+    x = Ufloat_to_array(x)
+    y = Ufloat_to_array(y)
+    
     popt, pcov = opt.curve_fit(func, x, y, p0=p0)
     
     perr = np.sqrt(np.diag(pcov))

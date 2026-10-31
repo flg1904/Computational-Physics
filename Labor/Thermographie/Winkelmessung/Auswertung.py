@@ -8,7 +8,7 @@ sys.path.append(str(repo_root / "Bibliotheken"))
 from Fehlerberechnung import *
 import numpy as np
 import matplotlib.pyplot as plt
-import string
+
 
 T_umgebung = ufloat(24 + 273, 0.5)
 
