@@ -17,7 +17,13 @@ I_2 = Messung[-3,2]
 phi_2 = Messung[-3,0]
 
 err_phi = 2 
-err_I = I * 0.001 + 1
+err_I = I * 0.03
+mask1 = I < 200
+mask2 = ~mask1 & (I < 2000)
+err_I[mask1] = err_I[mask1] + 200 * 0.005
+err_I[mask2] = err_I[mask2 ] + 2000 * 0.005
+I_2_e = csv_data_plus_error([I_2], 200 * 0.005 + I_2 * 0.03)
+
 phi_e = csv_data_plus_error(phi, err_phi) / 180 *np.pi
 I_e = csv_data_plus_error(I, err_I)
 phi = np.linspace(0,np.pi, 100)
@@ -33,10 +39,9 @@ I_fit_werte = I_fit(phi , parameter[0].n, parameter[1].n)
 print(f"I_0:      {parameter[0]:.1f}       lx")
 print(f"delt phi:   {parameter[1]:.4f} rad")
 print(f"delt phi: {parameter[1]/ np.pi * 180:.2f}     °")
-
 plt.figure( figsize = (12, 8))
-Mehrere_Datenreihen_ein_Plot([Plot, [phi, I_fit_werte],[[phi_e[-3]],[I_2]]],
-                              xlabel = r"$\varphi$ / rad",
+Mehrere_Datenreihen_ein_Plot([Plot, [phi, I_fit_werte],[[phi_e[-3]],I_2_e]],
+                              xlabel = r"$\varphi_r$ / rad",
                               ylabel = "I / lx",
                               fmtp   = ["o","-", "o"],
                               error  = [True, False, True],
