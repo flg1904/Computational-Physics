@@ -273,7 +273,7 @@ def _erzeuge_subplot_layout(anz_plots, sharey=False, figsize=None):
     nrows = math.ceil(anz_plots / ncols)
 
     if figsize is None:
-        figsize = {1: (8, 6), 2: (8, 12)}.get(anz_plots, (16, 12))
+        figsize = {1: (8, 6), 2: (14, 6)}.get(anz_plots, (16, 12))
 
     fig = plt.figure(figsize=figsize)
     # Doppelte Spaltenzahl, damit ein einzelner Plot mittig stehen kann
