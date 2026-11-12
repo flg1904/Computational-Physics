@@ -4,7 +4,7 @@ from Numeric_Integral import *
 from Findig_zeros import *
 
 
-# region Aufgagabe 1a) 
+# region Aufgabe 1a) 
 
 # Berechnet F = ∫_0^1 dy / sqrt(1 - y^4) mit Trapez-, Simpson- und Gaußregel,
 # jeweils ohne und mit Substitution y = sin(u), und vergleicht die Konvergenz.
@@ -31,7 +31,7 @@ from Findig_zeros import *
 a = 4
 
 y_start = 0
-y_end = 1
+y_end = 1-1e-6
 
 u_start = 0
 u_end = np.pi / 2
