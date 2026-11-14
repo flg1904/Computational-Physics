@@ -34,7 +34,7 @@ def Ufloat_to_array(data):
         for i, d in enumerate(data):
             if isinstance(d, UFloat):
                 arry[i] = d.nominal_value
-            elif isinstance(d, (int, float, Variable)):
+            else:
                 arry[i] = d
         return arry
     else:
@@ -410,7 +410,6 @@ def lineare_Regression(data):
 
     x = Ufloat_to_array(x)
     y = Ufloat_to_array(y)
-
     fit_parameter, cov_matrix = np.polyfit(x, y, 1, cov=True)
     steigung, ordinatenabstand = fit_parameter
     try:

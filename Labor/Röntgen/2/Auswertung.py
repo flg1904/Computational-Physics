@@ -82,8 +82,8 @@ plt.tight_layout()
 
 # Fit-Bereiche als Indizes innerhalb der jeweils vorhandenen Messwerte.
 # Der Endindex ist inklusive; None bedeutet den letzten Messpunkt.
-fit_start_R = [10, 3, 2, 6, 10, 5, 5]
-fit_end_R = [19, 10, 10, 12, 15, 12, 13]
+fit_start_R = [10, 4, 3, 7, 10, 5, 5]
+fit_end_R = [15, 10, 7, 12, 15, 10, 11]
 
 fit_parameter_R = []
 Plot_Fit = Plot_R.copy()
@@ -105,7 +105,7 @@ for i, (beta_R, rate_R) in enumerate(Plot_R):
     if len(fit_data[0]) < 3:
         raise ValueError(f"Der Fit-Bereich für R_{i} muss mindestens 3 Punkte enthalten.")
 
-    steigung, achsenabschnitt, _ = lineare_Regression(fit_data)
+    steigung, achsenabschnitt, Fit = lineare_Regression(fit_data)
     if steigung.nominal_value == 0:
         raise ValueError(f"Die Steigung des linearen Fits für R_{i} ist null.")
 
@@ -139,12 +139,39 @@ Mehrere_Datenreihen_ein_Plot(
 )
 
 plt.tight_layout()
-plt.show()
 
 
 E_max = np.array([22, 24, 26, 28, 30, 33, 35]) # Maximal energies in keV
 d_mean = ufloat(201.338, 0.018) * 1e-12
 
 c = 299792458 # m/s
+h = E_max * 2 * d_mean * np.sin(np.radians(np.array(theta)))/ c
+print(f"Berechnete Planck-Konstanten mit theta h: {h}")
+print(f"Berechnete mittlere Planck-Konstante mit theta  h: {csv_mittelwert(Ufloat_to_array(h))}")
 h = E_max * 2 * d_mean * np.sin(np.radians(np.array(theta)+ 0.5))/ c
-print(f"Berechnete Planck-Konstanten h: {csv_mittelwert(Ufloat_to_array(h))}")
+print(f"Berechnete Planck-Konstanten mit theta + 0.5 h: {h}")
+print(f"Berechnete mittlere Planck-Konstante mit theta + 0.5 h: {csv_mittelwert(Ufloat_to_array(h))}")
+
+x_E = c / (2 * d_mean * np.sin(np.radians(np.array(theta)))) * 1e-18
+steigung_E, ordinatenabstand_E, fit_E = lineare_Regression([x_E, E_max])
+print(f"Linearer Fit E_max: Steigung = {steigung_E}, Ordinatenabstand = {ordinatenabstand_E}")
+
+plt.figure(figsize=(12, 6))
+Mehrere_Datenreihen_ein_Plot(
+    [[x_E, E_max], [fit_E[0], fit_E[1]]],
+    titel=None,
+    xlabel=r"$\frac{c}{2 d\sin(\vartheta_\mathrm{min})}$ / s$^{-1}$",
+    ylabel=r"$E_{\max}$ / keV",
+    labels=[r"$E_{\max}$", "Linearer Fit"],
+    fmtp=["o", "--"],
+    colors=["cornflowerblue", "black"],
+    linewidths=[2, 2],
+    markersizes=[6, 6],
+    markerwiths=[1, 1],
+    grid=True,
+    leg_loc="best",
+    label_sizes=label_sizes_R,
+)
+
+plt.tight_layout()
+plt.show()
