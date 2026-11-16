@@ -273,7 +273,7 @@ def _erzeuge_subplot_layout(anz_plots, sharey=False, figsize=None):
     nrows = math.ceil(anz_plots / ncols)
 
     if figsize is None:
-        figsize = {1: (8, 6), 2: (14, 6)}.get(anz_plots, (16, 12))
+        figsize = {1: (8, 8), 2: (14, 8)}.get(anz_plots, (16, 12))
 
     fig = plt.figure(figsize=figsize)
     # Doppelte Spaltenzahl, damit ein einzelner Plot mittig stehen kann
@@ -388,17 +388,20 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.3, bottom= 0.1, top=0.95)
     
-def lineare_Regression(data):
+def lineare_Regression(data, durch_ursprung=False):
     """
     Berechnet die lineare Regression für gegebene Daten.
+
     :param data: Array mit den Daten
         Erster Eintrag: x-Werte,
         Zweiter Eintrag: y-Werte,
         Dritter Eintrag: Fehler in y-Richtung (optional)
         Vierter Eintrag: Fehler in x-Richtung (optional)
-    :return: Steigung, Achsenabschnitt, 
-            mit einer Standardabweichung von 1 Sigma
-            Steigungsfehler, Achsenabschnittsfehler
+
+    :param durch_ursprung: True = Fit durch den Ursprung,
+                           False = Fit mit Achsenabschnitt
+
+    :return: Steigung, Achsenabschnitt, Fit
     """
 
     if isinstance(data, list):
@@ -410,18 +413,39 @@ def lineare_Regression(data):
 
     x = Ufloat_to_array(x)
     y = Ufloat_to_array(y)
-    fit_parameter, cov_matrix = np.polyfit(x, y, 1, cov=True)
-    steigung, ordinatenabstand = fit_parameter
-    try:
-        delta_steigung, delta_ordinatenabstand = np.sqrt(np.diag(cov_matrix))
-    except Exception:
-        delta_steigung, delta_ordinatenabstand = (None, None)
 
+    if durch_ursprung:
+        # Lineare Regression durch den Ursprung
+        steigung = np.sum(x * y) / np.sum(x**2)
+        ordinatenabstand = 0.0
+
+        # Residuenbasierte Unsicherheit der Steigung
+        y_fit_values = steigung * x
+        n = len(x)
+        sigma = np.sqrt(np.sum((y - y_fit_values)**2) / (n - 1))
+        delta_steigung = sigma / np.sqrt(np.sum(x**2))
+        delta_ordinatenabstand = 0.01
+
+    else:
+        # Lineare Regression mit Achsenabschnitt
+        fit_parameter, cov_matrix = np.polyfit(x, y, 1, cov=True)
+        steigung, ordinatenabstand = fit_parameter
+
+        try:
+            delta_steigung, delta_ordinatenabstand = np.sqrt(
+                np.diag(cov_matrix)
+            )
+        except Exception:
+            delta_steigung, delta_ordinatenabstand = (None, None)
+
+    # Fit-Kurve erstellen
     t = np.linspace(np.min(x), np.max(x), 1000)
-    y_fit = [t,steigung * t + ordinatenabstand]
+    y_fit = [t, steigung * t + ordinatenabstand]
 
     steigung = ufloat(steigung, delta_steigung)
-    ordinatenabstand = ufloat(ordinatenabstand, delta_ordinatenabstand)
+    ordinatenabstand = ufloat(
+        ordinatenabstand, delta_ordinatenabstand
+    )
 
     return steigung, ordinatenabstand, y_fit
 
