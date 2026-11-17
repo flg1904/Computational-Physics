@@ -90,13 +90,29 @@ def mean_ufloat_explicit(values):
 
     return ufloat(mean_val, mean_err)
 
+def _normalisiere_error(error):
+    """
+    Vereinheitlicht den error-Parameter auf einen der Modi "n", "b" oder "f".
+        False / None / "n"  ->  "n"  (keine Fehlerdarstellung)
+        True  / "b"         ->  "b"  (Fehlerbalken)
+        "f"                 ->  "f"  (Fill between)
+    """
+    if isinstance(error, str):
+        e = error.strip().lower()
+        if e in ("n", "b", "f"):
+            return e
+        raise ValueError(
+            f"Ungültiger error-Wert '{error}'. Erlaubt: True, False, 'n', 'b', 'f'."
+        )
+    return "b" if error else "n"
+
 def Plot_Datenreihe(data, titel = None, xlabel = "x-Achse", 
                     ylabel = "y-Achse", fmtp='-', 
                     error=False, grid=False, label=None, 
                     interpolation="linear", leg_loc="best",
                     label_sizes = (24,24,30), linewidth=2,
                     markersize = 10, markerwidth = 2,
-                    color_line = None):
+                    color_line = None, ecolor = None):
 
     """
     Plotte eine Datenreihe.
@@ -110,7 +126,10 @@ def Plot_Datenreihe(data, titel = None, xlabel = "x-Achse",
         2) x-Achsenbeschriftung,
         3) y-Achsenbeschriftung
         4) Grafikeinmstellung (optional) (farben, Linienstile, Marker, etc.),
-        5) Fehlerbalken (bool)
+        5) error: Fehlerdarstellung
+            False oder "n": keine Fehler,
+            True  oder "b": Fehlerbalken,
+            "f": Fill between (y - Fehler bis y + Fehler wird gefüllt)
         6) Legende (bool)
         7) Grid (bool)
         8) Label der Legende (optional)
@@ -150,8 +169,17 @@ def Plot_Datenreihe(data, titel = None, xlabel = "x-Achse",
             x[i] = d.nominal_value
 
 
+    modus = _normalisiere_error(error)
+
+    # Für Fill between: obere und untere Grenze der y-Werte
+    if modus == "f":
+        y_f = np.asarray(y, dtype=float)
+        err_f = np.asarray(y_err, dtype=float)
+        y_max = y_f + err_f
+        y_min = y_f - err_f
+
     if interpolation == "linear":
-        if error:
+        if modus == "b":
 
             if(y_err is [0] * len(y)):
                 try:
@@ -172,25 +200,37 @@ def Plot_Datenreihe(data, titel = None, xlabel = "x-Achse",
                     x_err = [0] * len(x)
 
             plt.errorbar(x, y, yerr=y_err, xerr=x_err, fmt=fmtp, 
-                         label=label, capsize=5,ecolor="red",
+                         label=label, capsize=5,
+                         ecolor=ecolor if ecolor is not None else "red",
                          markersize=markersize,linewidth=linewidth,
                          markeredgewidth=markerwidth,
                          elinewidth=1,
                          capthick = 1,
                          color = color_line)
         else:
-            plt.plot(x, y, fmtp, 
+            linie, = plt.plot(x, y, fmtp, 
                      label=label, 
                      markersize=markersize, 
                      linewidth=linewidth,
                      markeredgewidth=markerwidth,
                      color = color_line)
+            if modus == "f":
+                fill_color = ecolor if ecolor is not None else linie.get_color()
+                plt.fill_between(np.asarray(x, dtype=float), y_min, y_max,
+                                 color=fill_color, alpha=0.3, linewidth=0)
     else:
         f = sci.interp1d(x, y, kind=interpolation)
         x_int = np.linspace(x[0], x[-1], 1000, True)
         y_int = f(x_int)
-        plt.plot(x_int, y_int, fmtp, label=label, linewidth=linewidth,
+        linie, = plt.plot(x_int, y_int, fmtp, label=label, linewidth=linewidth,
                  color = color_line)
+        if modus == "f":
+            x_f = np.asarray(x, dtype=float)
+            f_max = sci.interp1d(x_f, y_max, kind=interpolation)
+            f_min = sci.interp1d(x_f, y_min, kind=interpolation)
+            fill_color = ecolor if ecolor is not None else linie.get_color()
+            plt.fill_between(x_int, f_min(x_int), f_max(x_int),
+                             color=fill_color, alpha=0.3, linewidth=0)
         
     if label is not None:
         plt.legend(loc = leg_loc,fontsize=18)
@@ -200,7 +240,7 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                              grid=False, labels=None, 
                              interpolation_list="linear", leg_loc="best",
                              label_sizes=(24,24,30),linewidths=2, markersizes = 10, 
-                             markerwiths = 2, colors = None):
+                             markerwiths = 2, colors = None, ecolors = None):
     """
     Plotte mehrere Datenreihen.
     param data_list: Liste von Arrays mit den Daten
@@ -213,7 +253,9 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
     :param xlabel: Beschriftung der x-Achse
     :param ylabel: Beschriftung der y-Achse
     :param fmtp: Formatierungsparameter für die Plots
-    :param error: Ob Fehlerbalken gezeichnet werden sollen
+    :param error: Fehlerdarstellung (einzeln oder als Liste pro Datenreihe)
+        False / "n": keine, True / "b": Fehlerbalken, "f": Fill between
+    :param ecolors: Farbe der Fehlerbalken bzw. der Füllung (einzeln oder Liste pro Datenreihe)
     :param legend: Ob eine Legende angezeigt werden soll
     :param grid: Ob ein Gitter angezeigt werden soll
     :param labels: Liste von Labels für die Legende (optional)
@@ -239,6 +281,8 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
         markerwiths = [markerwiths] * len(data_list)
     if not isinstance(colors, list):
         colors = [colors] * len(data_list)
+    if not isinstance(ecolors, list):
+        ecolors = [ecolors] * len(data_list)
 
 
     for i, data in enumerate(data_list):
@@ -252,7 +296,8 @@ def Mehrere_Datenreihen_ein_Plot(data_list, titel="", xlabel="x-Achse",
                         linewidth=linewidths[i],
                         markersize=markersizes[i],
                         markerwidth=markerwiths[i],
-                        color_line= colors[i])
+                        color_line= colors[i],
+                        ecolor=ecolors[i])
 
 def _erzeuge_subplot_layout(anz_plots, sharey=False, figsize=None):
     """
@@ -305,7 +350,7 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     interpolation_listen=None, leg_loc_list = "best",
     label_sizes_list=(24,24,30), linewidths_list=2, 
     sharey = False, markersize_list = 5 , markerwith_list = 1,
-    colors_list = None, figsize = None):
+    colors_list = None, figsize = None, ecolor_list = None):
     """
     Plotte mehrere Datenreihen in verschiedenen Subplots (max. 4).
     Jeder Datenblock (data_list_pn) enthält mehrere Kurven für einen Subplot.
@@ -315,7 +360,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     :param xlabel_list: Liste der x-Achsen-Beschriftungen
     :param ylabel_list: Liste der y-Achsen-Beschriftungen
     :param fmtp_list: Liste von Formatstrings für die Kurven
-    :param error_list: Liste von Booleans für Fehlerbalken
+    :param error_list: Liste von Fehlermodi pro Plot (False/"n", True/"b", "f")
+    :param ecolor_list: Liste von Fehlerbalken-/Füllfarben pro Plot
     :param legend_list: Liste von Booleans für Legenden
     :param grid_list: Liste von Booleans für Gitter
     :param labels_list: Liste von Listen für Legendenbeschriftungen
@@ -347,6 +393,7 @@ def Mehrere_Datenreihen_verschiedene_Plots(
     grid_list    = expand(grid_list,    False, anz_plots)
     labels_list  = expand(labels_list,  None, anz_plots)
     colors_list  = expand(colors_list,  None, anz_plots)
+    ecolor_list  = expand(ecolor_list,  None, anz_plots)
     interpolation_listen = expand(interpolation_listen, "linear", anz_plots)
     leg_loc_list = expand(leg_loc_list, "upper right", anz_plots)
     label_sizes_list = expand(label_sizes_list, (18, 18, 24), anz_plots)
@@ -380,7 +427,8 @@ def Mehrere_Datenreihen_verschiedene_Plots(
             linewidths=linewidths_list[plot_index],
             markersizes=markersize_list[plot_index],
             markerwiths= markerwith_list[plot_index],
-            colors= colors_list[plot_index]
+            colors= colors_list[plot_index],
+            ecolors= ecolor_list[plot_index]
         )
 
         plot_index += 1
@@ -439,13 +487,12 @@ def lineare_Regression(data, durch_ursprung=False):
             delta_steigung, delta_ordinatenabstand = (None, None)
 
     # Fit-Kurve erstellen
-    t = np.linspace(np.min(x), np.max(x), 1000)
-    y_fit = [t, steigung * t + ordinatenabstand]
 
     steigung = ufloat(steigung, delta_steigung)
     ordinatenabstand = ufloat(
         ordinatenabstand, delta_ordinatenabstand
     )
+    y_fit = [x, steigung * x + ordinatenabstand]
 
     return steigung, ordinatenabstand, y_fit
 
