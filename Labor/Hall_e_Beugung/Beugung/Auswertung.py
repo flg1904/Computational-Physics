@@ -45,8 +45,8 @@ steigung2, achsenabschnitt2, fit2 = lineare_Regression(
     [x_Achs2, y_Achs2]
 )
 
-print(f"d1: {steigung1 * 1e12} pm")
-print(f"d2: {steigung2 * 1e12} pm")
+print(f"d1: {steigung1 * 1e12} pm, offset1: {achsenabschnitt1 * 1e12} pm")
+print(f"d2: {steigung2 * 1e12} pm, offset1: {achsenabschnitt2 * 1e12} pm")
 
 
 Mehrere_Datenreihen_verschiedene_Plots(
@@ -107,7 +107,7 @@ steigung, achsenabschnitt, fit = lineare_Regression(
 )
 
 
-print(f"e / m_e: {2 * steigung**2}, Offset: {achsenabschnitt}")
+print(f"e / m_e: {2 * steigung**2}, Steigung: {steigung}, Offset: {achsenabschnitt}")
 
 
 Mehrere_Datenreihen_verschiedene_Plots(

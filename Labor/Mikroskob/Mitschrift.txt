@@ -1,0 +1,31 @@
+Brennweitenbestimmung:
+
+Verwendete Linse hat eine unbekante Brennweite
+    1) Abschätzung ergab ebenflls ~(20 +/- 7) mm
+    2) Abbildungsgleichung
+        Bildweite b1 = (8.0 +/- 0.7) cm; Gegenstandsweite g1 = (3.5 +/- 0.7)cm 
+        Bildweite b2 = (222.5 +/- 0.7) cm; Gegenstandsweite g2 = (2.1 +/- 0.7)cm 
+    3) Bessel-verfahren
+        l = (11.5 +/- 0.7) cm; g1 = (3.5 +/- 0.7) cm; g2 = (6.6 +/- 0.7) cm
+
+    4) Einstellen von Vergrößerung A = 1 => b = g = 5 cm
+       Verwendeter gegenstand: Gruppe 1 Gegenstand 6 mit Breite = 413 Piel; Höhe 167 Pixel 
+
+Kleine Slebst gebaute Hand Mikroskop 
+    Beobachtungen am Verwendeten Gitter von Versuch Polarisation
+    Mit Großer Kugel wurde eine geringere Vergrößerung beobachtet.
+    Jedoch ist es schwierig in der kleinen Kugel zu erkennen.
+    Das Gitter konnte beobachtet werden. 
+
+
+Hellfeld_Einrichtung: 
+    Verwendeter gegenstand: Gruppe 1 Gegenstand 6 mit Breite = 1243 Piel; Höhe 516 Pixel
+    3i:     Hier wurde das Objektiv um 180° gedreht und sonst nichts an den einstellungen Geändert Bild vorher nacher wurde aufgenommen
+    3ii:    Zurückdrehen des Objektivs und entfernen des Difusors. Bild aufgenommen mit und ohne Autoexpouser. Kanten erhalten einen Schatten (Verschwimmen)
+    3iii:   Austauschen der Halogen mit blauer LED. Durch verstellen von Gegenstandsweite mit Mikrometerschraube => Scharfstellen => ein etwas größeres Bild
+            Kleinstes Sichtbares Objekt Gruppe 6 Objekt 1. Verstellung der Probe ist am Maximum daher kein weiteres Scharfstellen möglich. 
+            Austauschen mit Roter LED. Kleinstes Sichtbares Objekt Gruppe 6 Objekt 3.
+
+    4i:     Brennweiten: f_OK = 50 mm; f_OBJ = 35 mm, für t_0: Gesamtabstand der Linse = 12 cm => t_0 = 12 - f_OBJ - f_OK
+
+Dunkelfeld Mikroskob
